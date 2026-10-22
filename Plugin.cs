@@ -21,6 +21,8 @@ namespace SilkWeaverCompanion
         public static ConfigEntry<float> FollowSpeed;
         public static ConfigEntry<KeyCode> ToggleKey;
 
+        private GameObject activeCompanion;
+
         private void Awake()
         {
             Log = Logger;
@@ -30,11 +32,30 @@ namespace SilkWeaverCompanion
             FollowSpeed = Config.Bind("General", "FollowSpeed", 5.0f, "Скорость следования компаньона за Хорнет");
             ToggleKey = Config.Bind("General", "ToggleKey", KeyCode.F5, "Клавиша спавна/перезагрузки компаньона");
 
-            // 2. Применение Harmony патчей
+            // 2. Применение Harmony патчей (если понадобятся в будущем)
             harmony = new Harmony(PLUGIN_GUID);
             harmony.PatchAll();
 
             Log.LogInfo($"Плагин {PLUGIN_NAME} версии {PLUGIN_VERSION} успешно загружен!");
+        }
+
+        // Прямое отслеживание нажатия клавиши в самом плагине
+        private void Update()
+        {
+            if (Input.GetKeyDown(ToggleKey.Value))
+            {
+                if (activeCompanion == null)
+                {
+                    activeCompanion = new GameObject("SilkWeaverCompanion");
+                    activeCompanion.AddComponent<CompanionBehaviour>();
+                    Log.LogInfo("Компаньон 'Шелковый Жнец' призван!");
+                }
+                else
+                {
+                    Destroy(activeCompanion);
+                    Log.LogInfo("Компаньон отозван!");
+                }
+            }
         }
 
         private void OnDestroy()
@@ -52,23 +73,19 @@ namespace SilkWeaverCompanion
 
         private void Start()
         {
-            // Поиск объекта игрока (Хорнет)
             GameObject player = GameObject.FindWithTag("Player");
             if (player != null)
             {
                 hornetTransform = player.transform;
             }
             
-            // Настройка визуального стиля компаньона (простая светящаяся сфера)
             SetupVisuals();
         }
 
         private void SetupVisuals()
         {
-            // Создаем простой визуал если нет готовой 2D-текстуры
             SpriteRenderer sr = gameObject.AddComponent<SpriteRenderer>();
             
-            // Создаем программно круговую текстуру для свечения
             Texture2D tex = new Texture2D(32, 32);
             for (int x = 0; x < 32; x++)
             {
@@ -82,7 +99,7 @@ namespace SilkWeaverCompanion
             tex.Apply();
 
             sr.sprite = Sprite.Create(tex, new Rect(0, 0, 32, 32), new Vector2(0.5f, 0.5f), 32f);
-            sr.sortingOrder = 10; // Отображать поверх большинства элементов
+            sr.sortingOrder = 10;
         }
 
         private void Update()
@@ -94,7 +111,6 @@ namespace SilkWeaverCompanion
                 return;
             }
 
-            // 1. Плавное следование за Хорнет с небольшим офсетом и покачиванием
             bobTimer += Time.deltaTime * 3f;
             Vector3 targetPosition = hornetTransform.position + new Vector3(-1.2f, 1.5f + Mathf.Sin(bobTimer) * 0.2f, 0f);
             
@@ -104,7 +120,6 @@ namespace SilkWeaverCompanion
                 Time.deltaTime * Plugin.FollowSpeed.Value
             );
 
-            // 2. Периодический сканер и сбор Гео
             scanTimer += Time.deltaTime;
             if (scanTimer >= 0.5f)
             {
@@ -115,47 +130,18 @@ namespace SilkWeaverCompanion
 
         private void CollectNearbyGeo()
         {
-            // Поиск всех объектов Гео (в игре объекты обычно имеют компонент GeoCoin или тег "Geo")
             Collider2D[] hitColliders = Physics2D.OverlapCircleAll(transform.position, Plugin.PickupRadius.Value);
             
             foreach (var hit in hitColliders)
             {
-                // Проверяем по имени или компоненту
                 if (hit.gameObject.name.Contains("Geo") || hit.gameObject.CompareTag("Geo"))
                 {
-                    // Притягиваем объект Гео прямо к игроку
                     Rigidbody2D rb = hit.GetComponent<Rigidbody2D>();
                     if (rb != null)
                     {
                         Vector2 direction = (hornetTransform.position - hit.transform.position).normalized;
                         rb.velocity = direction * 12f;
                     }
-                }
-            }
-        }
-    }
-
-    // Harmony-патч для автовызова или обработки контроллера игрока
-    [HarmonyPatch(typeof(MonoBehaviour), "Update")]
-    public static class PlayerUpdatePatch
-    {
-        private static GameObject activeCompanion;
-
-        public static void Postfix()
-        {
-            // Отслеживание нажатия горячей клавиши для спавна компаньона
-            if (Input.GetKeyDown(Plugin.ToggleKey.Value))
-            {
-                if (activeCompanion == null)
-                {
-                    activeCompanion = new GameObject("SilkWeaverCompanion");
-                    activeCompanion.AddComponent<CompanionBehaviour>();
-                    Plugin.Log.LogInfo("Компаньон 'Шелковый Жнец' призван!");
-                }
-                else
-                {
-                    Object.Destroy(activeCompanion);
-                    Plugin.Log.LogInfo("Компаньон отозван!");
                 }
             }
         }
