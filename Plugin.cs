@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace SilkWeaverCompanion
 {
-    [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
+    [BepInPlugin("com.yourname.silkweavercompanion", "Silk Weaver Companion", "1.0.0")]
     public class Plugin : BaseUnityPlugin
     {
         public const string PLUGIN_GUID = "com.yourname.silkweavercompanion";
@@ -155,7 +155,7 @@ namespace SilkWeaverCompanion
                 else
                 {
                     Object.Destroy(activeCompanion);
-                    Plugin.Log.LogInfo("Компаньон отзыв!");
+                    Plugin.Log.LogInfo("Компаньон отозван!");
                 }
             }
         }
