@@ -2,16 +2,23 @@
 
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
+
     <AssemblyName>SilkWeaverCompanion</AssemblyName>
     <RootNamespace>SilkWeaverCompanion</RootNamespace>
     <OutputType>Library</OutputType>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
-  <!-- Автоматическая загрузка необходимых BepInEx пакетов из NuGet -->
   <ItemGroup>
+    <!-- Подключаем BepInEx 5 из NuGet -->
+    <PackageReference Include="BepInEx.BaseLib" Version="5.4.20" />
     <PackageReference Include="BepInEx.Core" Version="5.4.21" />
-    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1" PrivateAssets="all" />
-    <PackageReference Include="UnityEngine.Modules" Version="2021.3.0" IncludeAssets="compile" />
+    
+    <!-- Подключаем Harmony для патчей -->
+    <PackageReference Include="Lib.Harmony" Version="2.2.2" />
+
+    <!-- Базовые библиотеки Unity -->
+    <PackageReference Include="UnityEngine.Modules" Version="2021.3.16" />
   </ItemGroup>
 
 </Project>
