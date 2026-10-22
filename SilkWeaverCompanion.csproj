@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <AssemblyName>SilkWeaverCompanion</AssemblyName>
+    <RootNamespace>SilkWeaverCompanion</RootNamespace>
+    <OutputType>Library</OutputType>
+  </PropertyGroup>
+
+  <!-- Автоматическая загрузка необходимых BepInEx пакетов из NuGet -->
+  <ItemGroup>
+    <PackageReference Include="BepInEx.Core" Version="5.4.21" />
+    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1" PrivateAssets="all" />
+    <PackageReference Include="UnityEngine.Modules" Version="2021.3.0" IncludeAssets="compile" />
+  </ItemGroup>
+
+</Project>
