@@ -20,15 +20,19 @@ jobs:
       with:
         dotnet-version: '6.0.x'
 
-    # 1. Автоматическое восстановление NuGet-пакетов для .csproj файла
+    # 1. Добавляем официальный источник пакетов BepInEx
+    - name: Add BepInEx NuGet Source
+      run: dotnet nuget add source https://nuget.bepinex.dev/v3/index.json --name BepInEx
+
+    # 2. Восстанавливаем пакеты
     - name: Restore dependencies
       run: dotnet restore
 
-    # 2. Сборка проекта в режиме Release
+    # 3. Компилируем проект
     - name: Build Mod DLL
       run: dotnet build --configuration Release --no-restore
 
-    # 3. Сохранение готового .dll файла в Артефакты
+    # 4. Сохраняем скомпилированный .dll в Артефакты
     - name: Upload Mod Artifact
       uses: actions/upload-artifact@v4
       with:
