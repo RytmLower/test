@@ -9,26 +9,28 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest # Изменено на Windows для корректной поддержки .NET Framework 4.7.2
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '6.0.x'
 
-    - name: Setup NuGet
-      uses: NuGet/setup-nuget@v2
+    # 1. Автоматическое восстановление NuGet-пакетов для .csproj файла
+    - name: Restore dependencies
+      run: dotnet restore
 
-    - name: Restore NuGet Packages
-      run: nuget restore
+    # 2. Сборка проекта в режиме Release
+    - name: Build Mod DLL
+      run: dotnet build --configuration Release --no-restore
 
-    - name: Build Solution
-      run: msbuild /p:Configuration=Release
-
+    # 3. Сохранение готового .dll файла в Артефакты
     - name: Upload Mod Artifact
       uses: actions/upload-artifact@v4
       with:
         name: SilkWeaverCompanion-Mod
-        path: bin/Release/*.dll
+        path: "**/bin/Release/net472/*.dll"
