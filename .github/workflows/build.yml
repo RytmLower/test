@@ -1,0 +1,36 @@
+name: Build BepInEx Mod
+
+# Запускать сборку при каждом push в ветку main (или master)
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  # Позволяет запускать сборку вручную из вкладки Actions
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Клонируем ваш репозиторий на виртуальную машину
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # 2. Настраиваем .NET SDK (для компиляции C#)
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '6.0.x' # Используется версия .NET SDK для сборки
+
+    # 3. Восстанавливаем зависимости и собираем проект
+    - name: Build Mod DLL
+      run: dotnet build --configuration Release
+
+    # 4. Сохраняем скомпилированный .dll файл в Artifacts (скачиваемый архив)
+    - name: Upload Mod Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: SilkWeaverCompanion-Mod
+        path: bin/Release/net472/*.dll # Путь к скомпилированному файлу .dll
